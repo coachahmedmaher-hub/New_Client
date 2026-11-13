@@ -17,7 +17,7 @@
       st: { new: "طلب جديد", review: "تحت المراجعة", accepted: "مقبول", active: "مشترك", hold: "موقوف مؤقتًا", completed: "خلّص", rejected: "مرفوض" },
       done: "اتعمل", notYet: "لسه", noAccess: "مش مفعّل", back: "→ رجوع للقائمة",
       contact: "التواصل", age: "السن", sex: "النوع", lang: "لغة العميل", applied: "تاريخ الطلب",
-      manage: "إدارة العميل", status: "الحالة", subM: "مدة الاشتراك", months: "{n} شهر", start: "بداية الاشتراك", end: "نهاية الاشتراك", noSub: "—",
+      manage: "إدارة العميل", status: "الحالة", subM: "مدة الاشتراك", months: "{n} شهور", start: "بداية الاشتراك", end: "نهاية الاشتراك", noSub: "—",
       health: "المراجعة الصحية", hr: { "": "—", not_needed: "مش محتاجة", needs_review: "محتاجة مراجعة", discussed: "اتكلمت معاه", reviewed: "اتراجعت — تمام" },
       notes: "ملاحظات الكوتش (مش بتظهر للعميل)", save: "حفظ", saved: "اتحفظ ✓",
       access: "رابط العميل", activate: "فعّل التقييم وابعت الرابط", renew: "رابط جديد (يلغي القديم)", copy: "نسخ", copied: "اتنسخ ✓", sendWa: "ابعت الرابط على واتساب",
@@ -28,11 +28,11 @@
       checks: "المتابعة الأسبوعية", noChecks: "لسه مفيش متابعات.", ch_w: "الوزن (كجم)", ch_waist: "الوسط (سم)", ch_adh: "الالتزام بالأكل /10", ch_energy: "الطاقة /10", ch_sleep: "النوم /10", ch_sess: "عدد التمارين",
       date: "التاريخ", pain: "ألم", challenge: "أصعب حاجة", cnotes: "ملاحظات",
       pdf: "طباعة / PDF", report: "تنزيل تقرير", del: "مسح بيانات العميل", delQ: "متأكد؟ هيتمسح الطلب والتقييم وكل المتابعات نهائيًا (لو العميل طلب مسح بياناته).",
-      g: { goal: "الهدف", body: "الجسم", avail: "التمرين المتاح", exp: "الخبرة", where: "المكان والأدوات", activity: "النشاط اليومي", nutrition: "التغذية", supps: "مكملات ومشروبات", sleep: "النوم", stress: "الضغط", injury: "إصابات وألم", check: "يوم المتابعة", support: "يحفّزه" },
+      g: { plan: "الاشتراك اللي اختاره", goal: "الهدف", body: "الجسم", avail: "التمرين المتاح", exp: "الخبرة", where: "المكان والأدوات", activity: "النشاط اليومي", nutrition: "التغذية", supps: "مكملات ومشروبات", sleep: "النوم", stress: "الضغط", injury: "إصابات وألم", check: "يوم المتابعة", support: "يحفّزه" },
       days: "{n} أيام/أسبوع", perS: "{n} دقيقة للتمرين", h: "ساعة", quality: "جودة", allergy: "حساسية", dislikes: "مش بيحب", likes: "بيحب", meals: "وجبات/يوم", rehab: "تأهيل",
       f: { f_symptoms: "أعراض أثناء المجهود (ألم صدر/دوخة/نهجان/خفقان) — لازم كلام قبل أي تمرين، والأفضل موافقة دكتور", f_conditions: "مرض مشخّص أو اختار يتكلم على انفراد", f_meds: "بياخد أدوية ممكن تأثر على التمرين", f_pain: "عنده ألم حالي", f_advice: "عنده تعليمات طبية بخصوص التمرين", f_rehab: "إصابة قديمة متأهلش منها بالكامل", f_allergy: "حساسية أو عدم تحمل لأكل", f_appmed: "قال في الطلب إن عنده حالة صحية" },
       lvl: { high: "مهم جدًا", mid: "راجع", low: "خد بالك" },
-      setT: "الإعدادات", setP: "الإجابات بتتحفظ في جوجل شيت بتاعك (تابات Applications و Assessments و CheckIns). الباسورد بيتغير من ملف Code.gs وبعدين تشغّل setup تاني.", apiOk: "متصل بالسيرفر ✓", apiUrl: "رابط السيرفر",
+      setT: "الإعدادات", checkNeedsSub: "المتابعة الأسبوعية بتتفتح للعميل بعد ما تحدد مدة الاشتراك وتاريخ البداية.", setP: "الإجابات بتتحفظ في جوجل شيت بتاعك (تابات Applications و Assessments و CheckIns). الباسورد بيتغير من ملف Code.gs وبعدين تشغّل setup تاني.", apiOk: "متصل بالسيرفر ✓", apiUrl: "رابط السيرفر",
       waMsg: "أهلاً {name} 👋\nده رابطك الشخصي في Coach Ahmed Maher Online Coaching:\n{link}\nمنه تملا التقييم الكامل وتبعت متابعتك الأسبوعية. الرابط ده ليك انت بس — متشاركهوش."
     },
     en: {
@@ -55,11 +55,11 @@
       checks: "Weekly check-ins", noChecks: "No check-ins yet.", ch_w: "Weight (kg)", ch_waist: "Waist (cm)", ch_adh: "Nutrition adherence /10", ch_energy: "Energy /10", ch_sleep: "Sleep /10", ch_sess: "Sessions",
       date: "Date", pain: "Pain", challenge: "Challenge", cnotes: "Notes",
       pdf: "Print / PDF", report: "Download report", del: "Delete client data", delQ: "Are you sure? The application, assessment and all check-ins will be deleted permanently (for a client's deletion request).",
-      g: { goal: "Client goal", body: "Body", avail: "Training availability", exp: "Training experience", where: "Location & equipment", activity: "Daily activity", nutrition: "Nutrition considerations", supps: "Supplements & drinks", sleep: "Sleep", stress: "Stress", injury: "Injury notes", check: "Check-in day", support: "Stays consistent with" },
+      g: { plan: "Plan chosen", goal: "Client goal", body: "Body", avail: "Training availability", exp: "Training experience", where: "Location & equipment", activity: "Daily activity", nutrition: "Nutrition considerations", supps: "Supplements & drinks", sleep: "Sleep", stress: "Stress", injury: "Injury notes", check: "Check-in day", support: "Stays consistent with" },
       days: "{n} days/week", perS: "{n} min/session", h: "h", quality: "quality", allergy: "Allergy", dislikes: "Dislikes", likes: "Likes", meals: "meals/day", rehab: "rehab",
       f: { f_symptoms: "Symptoms during exercise (chest pain / dizziness / breathlessness / palpitations) — talk before any training; doctor clearance recommended", f_conditions: "Diagnosed condition, or prefers to discuss privately", f_meds: "Takes medication that may affect exercise", f_pain: "Current pain", f_advice: "Has medical advice/restrictions about exercise", f_rehab: "Old injury with rehab not completed", f_allergy: "Food allergy or intolerance", f_appmed: "Mentioned a health concern in the application" },
       lvl: { high: "High priority", mid: "Review", low: "Note" },
-      setT: "Settings", setP: "Answers are saved in your Google Sheet (tabs Applications, Assessments, CheckIns). To change the password, edit Code.gs and run setup again.", apiOk: "Connected ✓", apiUrl: "Server URL",
+      setT: "Settings", checkNeedsSub: "Weekly check-ins open for the client once you set the subscription length and start date.", setP: "Answers are saved in your Google Sheet (tabs Applications, Assessments, CheckIns). To change the password, edit Code.gs and run setup again.", apiOk: "Connected ✓", apiUrl: "Server URL",
       waMsg: "Hi {name} 👋\nHere is your personal link for Coach Ahmed Maher Online Coaching:\n{link}\nUse it to fill in your full assessment and send your weekly check-ins. This link is only for you — please don't share it."
     }
   };
@@ -134,6 +134,7 @@
     apending: rows.filter(r => (r.status === "accepted" || r.status === "active") && !hasAssess(r)).length,
     adone: rows.filter(hasAssess).length, review: rows.filter(needsReview).length
   });
+  const PRICE = { 2: 500, 3: 700, 4: 900 };
   const DAYIDX = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   function nextCheck(r, assess) {
     const day = assess && assess.q38; if (!day || r.status !== "active") return "";
@@ -214,6 +215,7 @@
     const has = Object.keys(a).length > 0;
     const R = [
       ["goal", J([H("a_goal"), a.q4 && `“${String(a.q4).slice(0, 220)}”`])],
+      ["plan", p.a_plan && `${t("months", { n: p.a_plan })} — ${PRICE[p.a_plan]} AED`],
       ["body", has && J([H("q1"), H("q2"), a.q3 && (H("q3") + (a.q3b ? ` (${a.q3b} ${(NL().ui || {}).kg || "kg"})` : ""))])],
       ["avail", J([p.a_days && (p.a_days === "other" ? H("a_days") : t("days", { n: p.a_days })), a.q14 && t("perS", { n: a.q14 }), a.q13 != null && a.q13 !== "" && (L === "ar" ? `بيتمرن دلوقتي ${a.q13} أيام` : `currently ${a.q13} days/week`)])],
       ["exp", J([H("a_exp"), H("q16")])],
@@ -273,8 +275,9 @@
             ${nc ? `<dt>${esc(t("c_next"))}</dt><dd>${esc(fmt(nc))}</dd>` : ""}</dl></div>
           <div class="panel noprint"><h3>${svgI(IC.gear)}${esc(t("manage"))}</h3><div class="ctl">
             <label>${esc(t("status"))}<select class="inp" id="m_st">${Object.keys(D[L].st).map(k => `<option value="${k}"${c.status === k ? " selected" : ""}>${esc(t("st." + k))}</option>`).join("")}</select></label>
-            <label>${esc(t("subM"))}<select class="inp" id="m_m"><option value="">—</option>${[1, 2, 3].map(m => `<option value="${m}"${Number(c.sub_months) === m ? " selected" : ""}>${esc(t("months", { n: m }))}</option>`).join("")}</select></label>
+            <label>${esc(t("subM"))}<select class="inp" id="m_m"><option value="">—</option>${[2, 3, 4].map(m => `<option value="${m}"${Number(c.sub_months || (c.sub_start ? 0 : p.a_plan)) === m ? " selected" : ""}>${esc(t("months", { n: m }))} — ${PRICE[m]} AED${!c.sub_months && Number(p.a_plan) === m ? " ★" : ""}</option>`).join("")}</select></label>
             <label>${esc(t("start"))}<input class="inp" id="m_s" type="date" value="${esc(String(c.sub_start || "").slice(0, 10))}"></label>
+            ${!c.sub_start ? `<div style="font-size:.82rem;color:var(--warn)">${esc(t("checkNeedsSub"))}</div>` : ""}
             <div style="font-size:.9rem;color:var(--ink2)">${esc(t("end"))}: <b id="m_e">${esc(c.sub_end ? fmt(c.sub_end) : t("noSub"))}</b></div>
             <label>${esc(t("health"))}<select class="inp" id="m_h">${Object.keys(D[L].hr).map(k => `<option value="${k}"${(c.health_review || "") === k ? " selected" : ""}>${esc(t("hr." + k))}</option>`).join("")}</select></label>
             <label>${esc(t("notes"))}<textarea class="inp" id="m_n" rows="5">${esc(c.coach_notes || "")}</textarea></label>

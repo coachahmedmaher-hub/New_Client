@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/app.css?v=1">
+<link rel="stylesheet" href="assets/app.css?v=2">
 </head>
 <body>
 <header class="top" id="top"></header>
@@ -18,9 +18,9 @@
 </main>
 <footer id="foot"></footer>
 
-<script src="assets/config.js?v=1"></script>
-<script src="assets/core.js?v=1"></script>
-<script src="assets/schema.js?v=1"></script>
+<script src="assets/config.js?v=2"></script>
+<script src="assets/core.js?v=2"></script>
+<script src="assets/schema.js?v=2"></script>
 <script>
 (function () {
   const { T, esc, icon, api, Form } = NCX, card = document.getElementById("card");
@@ -29,17 +29,18 @@
   function show() {
     if (state === "loading") return;
     if (state === "denied") { card.innerHTML = `<div class="done"><div class="big">${icon("shield")}</div><p>${esc(T("ui.noAccess"))}</p></div>`; return; }
+    if (state === "nosub") { card.innerHTML = `<div class="done"><div class="big">${icon("info")}</div><p>${esc(T("ui.ciNoSub"))}</p><a class="btn ghost" href="client.html?t=${encodeURIComponent(token)}">${esc(T("ui.cdT"))}</a></div>`; return; }
     if (state === "done") { card.innerHTML = `<div class="done"><div class="big">${icon("check")}</div><h1>${esc(T("ui.ciDoneT"))}</h1><p>${esc(T("ui.ciDoneP"))}</p><a class="btn ghost" href="client.html?t=${encodeURIComponent(token)}">${esc(T("ui.cdT"))}</a></div>`; return; }
     Form(card, SCHEMA.checkin, {
       data,
       header: () => `<div class="fhead"><span class="ico">${icon("chart")}</span><h1>${esc(T("ui.ciT"))}</h1></div><p class="fdesc">${esc(T("ui.ciP"))}</p>`,
       extra: () => `<div class="note">${icon("info")}<span>${esc(T("ui.photosNote"))}</span></div>`,
-      onSubmit: async d => { const r = await api("checkin", { token, data: d }); if (!r || !r.ok) throw new Error("net"); state = "done"; show(); window.scrollTo(0, 0); }
+      onSubmit: async d => { const r = await api("checkin", { token, data: d }); if (r && r.error === "no_subscription") { state = "nosub"; show(); return; } if (!r || !r.ok) throw new Error("net"); state = "done"; show(); window.scrollTo(0, 0); }
     });
   }
   NCX.start(show);
   (async () => {
-    try { const r = await api("client", { token }); if (!r.ok || ["accepted", "active"].indexOf(r.client.status) < 0) { state = "denied"; return show(); } client = r.client; state = "form"; show(); }
+    try { const r = await api("client", { token }); if (!r.ok || ["accepted", "active"].indexOf(r.client.status) < 0) { state = "denied"; return show(); } client = r.client; state = (client.sub_months && client.sub_start) ? "form" : "nosub"; show(); }
     catch (e) { state = "denied"; show(); }
   })();
 })();

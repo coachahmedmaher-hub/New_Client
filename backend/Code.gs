@@ -10,6 +10,8 @@
  * Nothing secret is ever sent to the website: the password stays here, clients only get their own data.
  */
 const COACH_PASSWORD = "CHANGE-ME-Ahmed2026";
+const NOTIFY_EMAIL = "ahmedbeso621@gmail.com";   // where alerts go. Empty = your own Gmail (the account that owns this script).
+const DASHBOARD_URL = "https://coachahmedmaher-hub.github.io/New_Client/coach.html";
 
 const TABS = {
   apps: { name: "Applications", head: ["id", "created", "status", "name", "email", "whatsapp", "age", "sex", "lang", "goals", "experience", "days", "where", "medical", "expect", "token", "sub_months", "sub_start", "sub_end", "health_review", "coach_notes", "assessment_at", "flags", "updated", "app_json", "assess_json"] },
@@ -58,6 +60,9 @@ const ACTIONS = {
     const now = new Date().toISOString();
     withLock_(() => sheet_("apps").appendRow([id, now, "new", cut_(d.a_name, 120), cut_(d.a_email, 160), cut_(d.a_wa, 40), age, cut_(d.a_sex, 10), cut_(req.lang, 5),
       list_(d.a_goal), str_(d.a_exp), str_(d.a_days), str_(d.a_where), str_(d.a_med), list_(d.a_expect), "", "", "", "", "", "", "", "", now, JSON.stringify(d).slice(0, 45000), ""]));
+    notify_("🆕 طلب جديد: " + cut_(d.a_name, 60), [
+      "الاسم: " + str_(d.a_name), "السن: " + age + " — " + ar_(d.a_sex), "واتساب: " + str_(d.a_wa) + "  https://wa.me/" + str_(d.a_wa).replace(/\D/g, ""), "الإيميل: " + str_(d.a_email),
+      "الهدف: " + ar_(d.a_goal), "الخبرة: " + ar_(d.a_exp) + " — أيام في الأسبوع: " + ar_(d.a_days), "مشكلة صحية: " + ar_(d.a_med), "الاشتراك اللي اختاره: " + (d.a_plan ? d.a_plan + " شهور" : "—")]);
     return { ok: true };
   },
 
@@ -85,15 +90,19 @@ const ACTIONS = {
       const at = ids.indexOf(r.v.id);
       if (at > -1) as.getRange(at + 2, 1, 1, rowVals.length).setValues([rowVals]); else as.appendRow(rowVals);
     });
+    notify_("📋 تقييم كامل وصل: " + r.v.name, ["العميل خلّص التقييم الكامل.", req.flags ? "⚑ محتاج مراجعة صحية: " + ar_(cut_(req.flags, 300)) : "مفيش حاجة صحية محتاجة مراجعة."]);
     return { ok: true };
   },
 
   checkin: req => {
     const r = byToken_(req.token); if (!r) return { ok: false, error: "no_access" };
     if (["accepted", "active"].indexOf(r.v.status) < 0) return { ok: false, error: "closed" };
+    if (!r.v.sub_months || !r.v.sub_start) return { ok: false, error: "no_subscription" };   // weekly check-ins start only once the coach sets the subscription
     const d = req.data || {}, n = x => (x === "" || x == null || isNaN(Number(x))) ? "" : Number(x);
     withLock_(() => sheet_("checks").appendRow([r.v.id, new Date().toISOString(), r.v.name, n(d.c_weight), n(d.c_waist), n(d.c_sessions), n(d.c_nutrition), n(d.c_energy), n(d.c_sleep),
       n(d.c_steps), str_(d.c_pain), cut_(d.c_paind, 1000), cut_(d.c_challenge, 1000), cut_(d.c_notes, 2000), JSON.stringify(d).slice(0, 8000)]));
+    notify_("📈 متابعة أسبوعية: " + r.v.name, ["الوزن: " + (d.c_weight || "—") + " — تمارين: " + (d.c_sessions || 0) + " — أكل: " + (d.c_nutrition || "—") + "/10 — طاقة: " + (d.c_energy || "—") + "/10",
+      d.c_pain === "yes" ? "⚑ ألم: " + cut_(d.c_paind, 300) : "مفيش ألم.", d.c_challenge ? "أصعب حاجة: " + cut_(d.c_challenge, 300) : "", d.c_notes ? "ملاحظات: " + cut_(d.c_notes, 500) : ""]);
     return { ok: true };
   },
 
@@ -156,6 +165,26 @@ const ACTIONS = {
     return { ok: true };
   })
 };
+
+/* ---------- alerts ---------- */
+const AR = {
+  male: "راجل", female: "ست", yes: "أيوه", no: "لأ", private: "عايز يتكلم على انفراد", other: "أخرى",
+  fat_loss: "خسارة دهون", muscle_gain: "بناء عضل", recomp: "إعادة تشكيل الجسم", weight_gain: "زيادة وزن", strength: "قوة", athletic: "أداء رياضي", mobility: "مرونة وحركة", health: "صحة عامة",
+  complete_beginner: "مبتدئ تمامًا", beginner: "مبتدئ", intermediate: "متوسط", advanced: "متقدم",
+  f_symptoms: "أعراض أثناء المجهود (أولوية)", f_conditions: "مرض مشخّص", f_meds: "أدوية", f_pain: "ألم حالي", f_advice: "تعليمات طبية", f_rehab: "إصابة متأهلتش", f_allergy: "حساسية أكل", f_appmed: "حالة صحية في الطلب"
+};
+const ar_ = x => (Array.isArray(x) ? x : String(x || "").split(/\s*,\s*/)).filter(String).map(v => AR[v] || v).join("، ");
+function notify_(subject, lines) {   // an email never blocks saving: any problem is ignored
+  try {
+    const to = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail(); if (!to) return;
+    MailApp.sendEmail({ to: to, subject: subject + " — Coach Ahmed Maher", body: lines.filter(String).join("\n") + "\n\nافتح لوحة الكوتش:\n" + DASHBOARD_URL });
+  } catch (e) {}
+}
+/* Run this once from the editor: it asks Google for permission to send you emails, then sends a test email. */
+function testNotify() {
+  notify_("✅ تجربة الإشعارات", ["لو الإيميل ده وصلك، يبقى الإشعارات شغالة."]);
+  return "Sent to " + (NOTIFY_EMAIL || Session.getEffectiveUser().getEmail());
+}
 
 /* ---------- helpers ---------- */
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }

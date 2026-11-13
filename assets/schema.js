@@ -16,7 +16,8 @@
     { id: "a_days", type: "single", req: true, opts: ["2", "3", "4", "5", "6", "other"], other: true },
     { id: "a_where", type: "single", req: true, opts: ["gym", "home_gym", "home_none", "combo"] },
     { id: "a_med", type: "single", req: true, opts: ["no", "yes", "private"] },
-    { id: "a_expect", type: "multi", req: true, opts: ["program", "nutrition", "accountability", "technique", "monitoring", "complete"] }
+    { id: "a_expect", type: "multi", req: true, opts: ["program", "nutrition", "accountability", "technique", "monitoring", "complete"] },
+    { id: "a_plan", type: "single", req: true, opts: ["2", "3", "4"], note: "planNote" }
   ] }];
 
   S.assessment = [
@@ -26,7 +27,7 @@
       { id: "q3", type: "single", req: true, opts: ["increased", "decreased", "stable", "unsure"] },
       { id: "q3b", type: "number", min: 0, max: 80, unit: "kg", show: d => d.q3 === "increased" || d.q3 === "decreased" },
       { id: "q4", type: "textarea", req: true, max: 1500 },
-      { id: "q5", type: "single", req: true, opts: ["time", "nutrition", "motivation", "knowledge", "inconsistency", "health", "other"], other: true }
+      { id: "q5", type: "multi", req: true, opts: ["time", "nutrition", "motivation", "knowledge", "inconsistency", "health", "other"], other: true }
     ] },
     { id: "s2", icon: "heart", note: "healthNote", fields: [
       { id: "q6", type: "multi", req: true, opts: ["none", "cardio", "bp", "diabetes", "resp", "neuro", "bone", "other_dx", "private"], excl: ["none", "private"] },
@@ -36,10 +37,10 @@
       { id: "q8d", type: "textarea", max: 1500, show: d => d.q8 === "yes" },
       { id: "q9", type: "single", req: true, opts: ["yes", "no"], set: "yn" },
       { id: "q9a", type: "text", req: true, max: 200, show: d => yes(d.q9) },
-      { id: "q9b", type: "scale", min: 0, max: 10, req: true, show: d => yes(d.q9) },
+      { id: "q9b", type: "scale", min: 0, max: 10, tone: "lowGood", req: true, show: d => yes(d.q9) },
       { id: "q9c", type: "text", max: 300, show: d => yes(d.q9) },
       { id: "q9d", type: "text", max: 300, show: d => yes(d.q9) },
-      { id: "q9e", type: "text", max: 120, show: d => yes(d.q9) },
+      { id: "q9e", type: "text", req: true, max: 120, show: d => yes(d.q9) },
       { id: "q10", type: "single", req: true, opts: ["yes", "no"], set: "yn" },
       { id: "q10a", type: "text", req: true, max: 200, show: d => yes(d.q10) },
       { id: "q10b", type: "text", max: 80, show: d => yes(d.q10) },
@@ -56,7 +57,7 @@
       { id: "q15", type: "multi", req: true, opts: ["full_gym", "db", "bb", "bands", "cardio", "bw", "other"], other: true },
       { id: "q16", type: "single", req: true, opts: ["none", "lt6", "6to12", "1to3", "gt3"] },
       { id: "q17", type: "textarea", max: 1500 },
-      { id: "q18", type: "single", req: true, opts: ["lt3", "3to5", "5to8", "8to10", "gt10", "unknown"] },
+      { id: "q18", type: "single", req: true, opts: ["lt3", "3to5", "5to8", "8to10", "gt10", "unknown"], stars: { "3to5": 1, "5to8": 2, "8to10": 3, gt10: 4 } },
       { id: "q19a", type: "text", max: 300 },
       { id: "q19b", type: "text", max: 300 }
     ] },
@@ -82,9 +83,9 @@
     ] },
     { id: "s5", icon: "moon", fields: [
       { id: "q31", type: "single", req: true, opts: ["lt5", "5to6", "6to7", "7to8", "8to9", "gt9"] },
-      { id: "q32", type: "scale", min: 1, max: 5, req: true },
+      { id: "q32", type: "scale", min: 1, max: 5, tone: "highGood", req: true },
       { id: "q32b", type: "text", max: 120 },
-      { id: "q33", type: "scale", min: 0, max: 10, req: true },
+      { id: "q33", type: "scale", min: 0, max: 10, tone: "lowGood", req: true },
       { id: "q33b", type: "multi", opts: ["sleep", "appetite", "training", "none"], excl: ["none"], show: d => Number(d.q33) >= 7 },
       { id: "q34", type: "single", req: true, opts: ["sitting", "standing", "walking", "physical", "mixed", "shift"] },
       { id: "q34b", type: "text", max: 200 }
@@ -94,7 +95,7 @@
       { id: "q36", type: "single", req: true, opts: ["yes", "no", "help"] },
       { id: "q37", type: "single", req: true, opts: ["yes", "no"], set: "yn" },
       { id: "q38", type: "single", req: true, opts: ["sat", "sun", "mon", "tue", "wed", "thu", "fri"], row: true },
-      { id: "q39", type: "single", req: true, opts: ["accountability", "workout", "nutrition", "motivation", "reports", "combo"] },
+      { id: "q39", type: "multi", req: true, opts: ["accountability", "workout", "nutrition", "motivation", "reports"] },
       { id: "q40", type: "textarea", max: 2000 },
       { id: "consent_health", type: "check", req: true },
       { id: "consent_photos", type: "check", show: d => yes(d.q37) }
@@ -104,11 +105,11 @@
   S.checkin = [{ id: "ci", fields: [
     { id: "c_weight", type: "number", min: 30, max: 300, step: 0.1, unit: "kg" },
     { id: "c_waist", type: "number", min: 40, max: 250, step: 0.5, unit: "cm" },
-    { id: "c_sessions", type: "number", req: true, min: 0, max: 14 },
-    { id: "c_nutrition", type: "scale", min: 1, max: 10, req: true },
-    { id: "c_energy", type: "scale", min: 1, max: 10, req: true },
-    { id: "c_sleep", type: "scale", min: 1, max: 10, req: true },
-    { id: "c_steps", type: "number", min: 0, max: 60000 },
+    { id: "c_sessions", type: "single", req: true, opts: ["0", "1", "2", "3", "4", "5", "6", "7"], row: true },
+    { id: "c_nutrition", type: "scale", min: 1, max: 10, tone: "highGood", req: true },
+    { id: "c_energy", type: "scale", min: 1, max: 10, tone: "highGood", req: true },
+    { id: "c_sleep", type: "scale", min: 1, max: 10, tone: "highGood", req: true },
+    { id: "c_steps", type: "single", opts: ["lt2", "2to4", "4to6", "6to8", "8to10", "gt10"], stars: { "2to4": 1, "4to6": 2, "6to8": 3, "8to10": 4, gt10: 5, lt2: 0 }, ask: ["lt2", "gt10"] },
     { id: "c_pain", type: "single", req: true, opts: ["yes", "no"], set: "yn" },
     { id: "c_paind", type: "textarea", req: true, max: 800, show: d => yes(d.c_pain) },
     { id: "c_challenge", type: "textarea", max: 800 },

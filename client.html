@@ -9,15 +9,15 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/app.css?v=1">
+<link rel="stylesheet" href="assets/app.css?v=2">
 </head>
 <body>
 <header class="top" id="top"></header>
 <main class="wrap narrow" id="main"><div class="formcard"><div class="state"><div class="spin"></div><span data-t="ui.loading">Loading…</span></div></div></main>
 <footer id="foot"></footer>
 
-<script src="assets/config.js?v=1"></script>
-<script src="assets/core.js?v=1"></script>
+<script src="assets/config.js?v=2"></script>
+<script src="assets/core.js?v=2"></script>
 <script>
 (function () {
   const { T, esc, icon, api } = NCX, main = document.getElementById("main");
@@ -35,7 +35,7 @@
     if (denied) { main.innerHTML = `<div class="formcard"><div class="done"><div class="big">${icon("shield")}</div><p>${esc(T("ui.noAccess"))}</p></div></div>`; return; }
     if (!c) return;
     const sub = c.sub_months ? T("ui.months", { n: c.sub_months }) : T("ui.cdNone");
-    const canCheck = ["accepted", "active"].indexOf(c.status) > -1;
+    const canCheck = ["accepted", "active"].indexOf(c.status) > -1 && c.sub_months && c.sub_start;
     const ch = (c.checkins || []).slice().reverse();
     main.innerHTML = `<div class="formcard">
       <div class="fhead"><span class="ico">${icon("target")}</span><h1>${esc(T("ui.cdHi", { name: (c.name || "").split(" ")[0] }))}</h1></div>
@@ -47,6 +47,7 @@
       <div style="display:flex;flex-wrap:wrap;gap:10px">
         ${c.status !== "completed" ? `<a class="btn ${c.assessment_at ? "ghost" : "gold"}" href="assessment.html${q}">${esc(c.assessment_at ? T("ui.cdAssessEdit") : T("ui.cdAssessGo"))}</a>` : ""}
         ${canCheck ? `<a class="btn ${c.assessment_at ? "gold" : "ghost"}" href="checkin.html${q}">${esc(T("ui.cdCheckGo"))}</a>` : ""}
+      </div>${!canCheck && c.status !== "completed" ? `<p style="color:var(--muted);font-size:.9rem;margin:10px 0 0">${esc(T("ui.ciNoSub"))}</p>` : ""}<div>
       </div>
       <h2 style="margin:28px 0 10px;font-size:1.15rem">${esc(T("ui.cdHist"))}</h2>
       ${spark(c.checkins || [])}

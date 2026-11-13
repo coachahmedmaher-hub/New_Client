@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/app.css?v=1">
+<link rel="stylesheet" href="assets/app.css?v=2">
 </head>
 <body>
 <header class="top" id="top"></header>
@@ -29,6 +29,11 @@
           </div>
   </section>
 
+  <section class="results" aria-labelledby="resT">
+    <div class="wrap"><h2 class="h2" id="resT" data-t="ui.resT"></h2></div>
+    <div class="ticker"><div class="track" id="track"></div></div>
+  </section>
+
   <section class="block" id="how">
     <div class="wrap">
       <div class="eyebrow">01 — 04</div>
@@ -39,6 +44,16 @@
         <div class="stepc"><b data-t="ui.st3T"></b><p data-t="ui.st3P"></p></div>
         <div class="stepc"><b data-t="ui.st4T"></b><p data-t="ui.st4P"></p></div>
       </div>
+    </div>
+  </section>
+
+  <section class="block" id="prices">
+    <div class="wrap">
+      <h2 class="h2" data-t="ui.priceT"></h2>
+      <div class="cur"><label for="cur" data-t="ui.curL"></label><select id="cur"></select></div>
+      <div class="prices" id="pricecards"></div>
+      <p class="fx" id="fx" data-t="ui.fxNote"></p>
+      <div class="note hot" style="margin-top:16px" id="no1"></div>
     </div>
   </section>
 
@@ -54,13 +69,32 @@
 </main>
 <footer id="foot"></footer>
 
-<script src="assets/config.js?v=1"></script>
-<script src="assets/core.js?v=1"></script>
+<script src="assets/config.js?v=2"></script>
+<script src="assets/core.js?v=2"></script>
 <script>
 NCX.start(() => {
   const { T, icon, esc } = NCX;
   const items = [["w1", "dumbbell"], ["w2", "plate"], ["w3", "chat"], ["w4", "eye"], ["w5", "chart"], ["w6", "check"]];
   document.getElementById("incl").innerHTML = items.map(([k, i]) => `<div><span class="ico">${icon(i)}</span><span>${esc(T("ui." + k))}</span></div>`).join("");
+  const P = [[2, 500, "refund2"], [3, 700, "refund3", "best"], [4, 900, "refund4"]];
+  const CUR = ["AED", "USD", "EUR", "GBP", "SAR", "KWD", "QAR", "OMR", "BHD", "EGP", "INR", "PKR", "PHP", "LKR", "BDT", "NPR", "RUB"];
+  const sel = document.getElementById("cur"); let cur = sel.value || "AED";
+  sel.innerHTML = CUR.map(c => `<option${c === cur ? " selected" : ""}>${c}</option>`).join("");
+  const nf = n => new Intl.NumberFormat("en", { maximumFractionDigits: n < 100 ? 1 : 0 }).format(n);
+  function cards() {
+    const r = cur !== "AED" && NCX._fx && NCX._fx[cur];
+    document.getElementById("pricecards").innerHTML = P.map(([m, a, ref, best]) => `<div class="price${best ? " best" : ""}">${best ? `<span class="tagb">${esc(T("ui.best"))}</span>` : ""}<b>${esc(T("o.a_plan." + m).split(/ [—–-] /)[0])}</b><div class="amt" dir="ltr">${a}<small>${esc(T("ui.aed"))}</small></div>${r ? `<div class="conv" dir="ltr">≈ ${nf(a * r)} ${cur}</div>` : ""}<div class="per">${esc(T("ui.perMonth", { n: Math.round(a / m) }))}</div><div class="ref">${esc(T("ui." + ref))}</div></div>`).join("");
+  }
+  sel.onchange = async () => {
+    cur = sel.value;
+    if (cur !== "AED" && !NCX._fx) { try { const j = await (await fetch("https://open.er-api.com/v6/latest/AED")).json(); if (j && j.rates) NCX._fx = j.rates; } catch (e) {} }
+    if (cur !== "AED" && !(NCX._fx && NCX._fx[cur])) { document.getElementById("fx").textContent = T("ui.fxFail"); } else document.getElementById("fx").textContent = T("ui.fxNote");
+    cards();
+  };
+  cards();
+  const imgs = Array.from({ length: 10 }, (_, i) => `<img src="images/results/r${i + 1}.jpg" alt="" width="560" height="772" loading="lazy" draggable="false">`).join("");
+  document.getElementById("track").innerHTML = imgs + imgs.replace(/alt=""/g, 'alt="" aria-hidden="true"');
+  document.getElementById("no1").innerHTML = `${icon("info")}<span>${esc(T("ui.planNote"))}</span>`;
   document.getElementById("scope").innerHTML = `<span class="ico">${icon("shield")}</span><div><b>${esc(T("ui.scopeT"))}</b><p>${esc(T("ui.scopeP"))}</p></div>`;
 });
 </script>

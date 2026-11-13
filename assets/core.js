@@ -3,7 +3,7 @@
   const ORDER = ["ar", "en", "ur", "hi", "ml", "fil", "fr", "de", "ru"];
   const NAMES = { ar: "العربية", en: "English", ur: "اردو", hi: "हिन्दी", ml: "മലയാളം", fil: "Filipino", fr: "Français", de: "Deutsch", ru: "Русский" };
   const RTL = { ar: 1, ur: 1 };
-  const V = "?v=1";
+  const V = "?v=2";
   const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
   const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -80,6 +80,14 @@
     return res.json();
   }
 
+  /* Number colours: green = good, dark red = bad. lowGood: 0 is good (pain, stress). highGood: max is good (sleep, energy). */
+  function tone(f, v) {
+    let t = (v - f.min) / ((f.max - f.min) || 1); if (f.tone === "highGood") t = 1 - t;
+    const h = Math.round(125 * (1 - t)), l = Math.round(40 - t * 12), sat = 72;
+    return `background:hsl(${h} ${sat}% ${l}%);border-color:hsl(${h} ${sat}% ${l + 8}%);color:#fff`;
+  }
+  window.NC_TONE = tone;
+
   /* ---------- the form ---------- */
   const CODES = ["+971", "+966", "+974", "+965", "+968", "+973", "+20", "+962", "+961", "+212", "+213", "+216", "+91", "+92", "+880", "+94", "+977", "+63", "+44", "+33", "+49", "+7", "+1", "+61", "+90", "+98"];
   const visible = (f, d) => !f.show || f.show(d);
@@ -91,7 +99,7 @@
     function save() { if (opts.onChange) opts.onChange(d, step); }
     function fieldHtml(f) {
       const id = "f_" + f.id, val = d[f.id], help = H(f.id);
-      const req = f.req ? ` <span class="req" aria-hidden="true">*</span>` : (f.type === "check" ? "" : ` <span class="opt">(${esc(T("ui.optional"))})</span>`);
+      const req = f.req ? ` <span class="req" aria-hidden="true">*</span>` : (f.type === "check" || T("q." + f.id).indexOf(T("ui.optional")) > -1 ? "" : ` <span class="optl">(${esc(T("ui.optional"))})</span>`);
       const sub = f.show ? " sub" : "";
       let lab = f.type === "check" ? "" : `<label class="lbl" for="${id}" id="${id}_l">${esc(Q(f.id))}${req}</label>`;
       let h = help ? `<p class="help" id="${id}_h">${esc(help)}</p>` : "";
@@ -116,9 +124,13 @@
         const cls = f.type === "scale" ? "scale" : "opts" + (f.row ? " row" : "");
         body = `<div class="${cls}" role="${multi ? "group" : "radiogroup"}" aria-labelledby="${id}_l" id="${id}">` + list.map(o => {
           const on = multi ? (Array.isArray(val) && val.indexOf(o) > -1) : String(val) === o;
-          return `<label class="opt${multi ? " multi" : ""}${on ? " on" : ""}"><input type="${multi ? "checkbox" : "radio"}" name="${id}" value="${esc(o)}" data-k="${f.id}"${on ? " checked" : ""}><span class="mk"></span><span>${esc(f.type === "scale" ? o : O(f, o))}</span></label>`;
+          const st = f.stars && f.stars[o] ? `<span class="stars" aria-hidden="true">${"★".repeat(f.stars[o])}</span>` : "";
+          const col = on && f.tone ? ` style="${tone(f, Number(o))}"` : "";
+          return `<label class="opt${multi ? " multi" : ""}${on ? " on" : ""}${col ? " toned" : ""}"${col}><input type="${multi ? "checkbox" : "radio"}" name="${id}" value="${esc(o)}" data-k="${f.id}"${on ? " checked" : ""}><span class="mk"></span><span>${esc(f.type === "scale" ? o : O(f, o))}</span>${st}</label>`;
         }).join("") + `</div>`;
         if (f.type === "scale") body += `<div class="scale-ends"><span>${f.min}</span><span>${f.max}</span></div>`;
+        if (f.ask && f.ask.indexOf(val) > -1) body += `<div class="unitwrap other"><input class="inp" data-k="${f.id}_n" type="number" inputmode="numeric" min="0" max="100000" value="${esc(d[f.id + "_n"] == null ? "" : d[f.id + "_n"])}" placeholder="${esc(T("ui.howMany"))}" aria-label="${esc(T("ui.howMany"))}"></div>`;
+        if (f.note) body += `<div class="note hot">${icon("info")}<span>${esc(T("ui." + f.note))}</span></div>`;
         if (f.other && (multi ? (val || []).indexOf("other") > -1 : val === "other")) body += `<input class="inp other" data-k="${f.id}_o" type="text" maxlength="200" placeholder="${esc(T("ui.other"))}" value="${esc(d[f.id + "_o"] || "")}" aria-label="${esc(T("ui.other"))}">`;
       } else if (f.type === "check") {
         body = `<label class="check"><input type="checkbox" id="${id}" data-k="${f.id}"${val ? " checked" : ""}><span>${T("q." + f.id)}${f.req ? ` <span class="req">*</span>` : ""}</span></label>`;
@@ -162,7 +174,7 @@
           d[k] = a; clearErr(k); save(); rerenderFields(); mark();
         });
         else if (el.type === "checkbox") el.addEventListener("change", () => { d[k] = el.checked; clearErr(k); save(); rerenderFields(); mark(); });
-        else el.addEventListener("input", () => { d[k] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value; clearErr(k.replace(/_o$/, "")); save(); mark(); });
+        else el.addEventListener("input", () => { d[k] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value; clearErr(k.replace(/_(o|n)$/, "")); save(); mark(); });
       });
       root.querySelectorAll("[data-pn],[data-pc]").forEach(el => el.addEventListener("input", () => {
         const k = el.dataset.pn || el.dataset.pc, w = el.closest(".phone");
@@ -206,6 +218,7 @@
       if (f.type === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v).trim())) return "ui.eEmail";
       if (f.type === "number") { const n = Number(v); if (isNaN(n) || n < f.min || n > f.max) return ["ui.eNum", { a: f.min, b: f.max }]; }
       if (f.other && (Array.isArray(v) ? v.indexOf("other") > -1 : v === "other") && !String(d[f.id + "_o"] || "").trim()) return "ui.eOther";
+      if (f.ask && f.ask.indexOf(v) > -1 && (d[f.id + "_n"] === "" || d[f.id + "_n"] == null)) return "ui.eHowMany";
       return null;
     }
     function validate() {
@@ -239,7 +252,7 @@
     if (f.type === "height") return v.u === "ft" ? `${v.ft || 0} ft ${v.in || 0} in (${Math.round((v.ft || 0) * 30.48 + (v.in || 0) * 2.54)} cm)` : `${v.v} cm`;
     if (f.type === "weight") return v.u === "lb" ? `${v.v} lb (${Math.round(v.v * 0.4536 * 10) / 10} kg)` : `${v.v} kg`;
     if (f.type === "single" || f.type === "multi") {
-      const a = (Array.isArray(v) ? v : [v]).map(x => x === "other" && d[f.id + "_o"] ? OL(f, x, L) + ": " + d[f.id + "_o"] : OL(f, x, L));
+      const a = (Array.isArray(v) ? v : [v]).map(x => x === "other" && d[f.id + "_o"] ? OL(f, x, L) + ": " + d[f.id + "_o"] : (f.ask && f.ask.indexOf(x) > -1 && d[f.id + "_n"] !== "" && d[f.id + "_n"] != null) ? OL(f, x, L) + ": " + d[f.id + "_n"] : OL(f, x, L));
       return a.join(", ");
     }
     if (f.type === "scale") return `${v} / ${f.max}`;
