@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coach Ahmed Maher · Online Coaching</title>
+<meta name="description" content="Online training and nutrition coaching with Coach Ahmed Maher. Train smart. Live strong.">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css?v=1">
+</head>
+<body>
+<header class="top" id="top"></header>
+<main>
+  <section class="hero">
+    <div class="coachpic"><img src="images/coach.jpg" alt="Coach Ahmed Maher" width="848" height="1264" draggable="false"></div>
+    <div class="wrap">
+      <div>
+        <div class="eyebrow reveal" data-t="ui.online"></div>
+        <h1 class="reveal d1">Ahmed<span>Maher</span></h1>
+        <p class="tag reveal d1" dir="ltr">TRAIN SMART. LIVE STRONG.</p>
+        <h2 class="reveal d2" data-t="ui.heroT"></h2>
+        <p class="reveal d2" data-t="ui.heroP"></p>
+        <div class="cta reveal d3"><a class="btn gold" href="apply.html" data-t="ui.apply"></a><a class="btn ghost" href="#how" data-t="ui.howT"></a></div>
+      </div>
+          </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <div class="eyebrow">01 — 04</div>
+      <h2 class="h2" data-t="ui.howT"></h2>
+      <div class="steps">
+        <div class="stepc"><b data-t="ui.st1T"></b><p data-t="ui.st1P"></p></div>
+        <div class="stepc"><b data-t="ui.st2T"></b><p data-t="ui.st2P"></p></div>
+        <div class="stepc"><b data-t="ui.st3T"></b><p data-t="ui.st3P"></p></div>
+        <div class="stepc"><b data-t="ui.st4T"></b><p data-t="ui.st4P"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2 class="h2" data-t="ui.whatT"></h2>
+      <div class="incl" id="incl"></div>
+      <div style="height:18px"></div>
+      <div class="scope" id="scope"></div>
+      <div style="text-align:center;margin-top:30px"><a class="btn gold" href="apply.html" data-t="ui.apply"></a></div>
+    </div>
+  </section>
+</main>
+<footer id="foot"></footer>
+
+<script src="assets/config.js?v=1"></script>
+<script src="assets/core.js?v=1"></script>
+<script>
+NCX.start(() => {
+  const { T, icon, esc } = NCX;
+  const items = [["w1", "dumbbell"], ["w2", "plate"], ["w3", "chat"], ["w4", "eye"], ["w5", "chart"], ["w6", "check"]];
+  document.getElementById("incl").innerHTML = items.map(([k, i]) => `<div><span class="ico">${icon(i)}</span><span>${esc(T("ui." + k))}</span></div>`).join("");
+  document.getElementById("scope").innerHTML = `<span class="ico">${icon("shield")}</span><div><b>${esc(T("ui.scopeT"))}</b><p>${esc(T("ui.scopeP"))}</p></div>`;
+});
+</script>
+</body>
+</html>

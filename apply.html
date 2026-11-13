@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apply · Coach Ahmed Maher</title>
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css?v=1">
+</head>
+<body>
+<header class="top" id="top"></header>
+<main class="wrap narrow">
+  <div class="formcard" id="card"></div>
+</main>
+<footer id="foot"></footer>
+
+<script src="assets/config.js?v=1"></script>
+<script src="assets/core.js?v=1"></script>
+<script src="assets/schema.js?v=1"></script>
+<script>
+(function () {
+  const { T, esc, icon, api, Form, store } = NCX, card = document.getElementById("card");
+  let data = {}; try { data = JSON.parse(store.get("nc-apply") || "{}"); } catch (e) {}
+  let state = "form";
+  const sections = [{ id: "app", fields: SCHEMA.application[0].fields.concat([{ id: "consent", type: "check", req: true }]) }];
+
+  function show() {
+    if (state === "done") {
+      card.innerHTML = `<div class="done"><div class="big">${icon("check")}</div><h1>${esc(T("ui.doneT"))}</h1><p>${esc(T("ui.doneP"))}</p><p style="font-size:.9rem;color:var(--muted)">${esc(T("ui.doneNote"))}</p><a class="btn ghost" href="index.html">${esc(T("ui.home"))}</a></div>`;
+      return;
+    }
+    if (state === "minor") {
+      card.innerHTML = `<div class="done"><div class="big">${icon("info")}</div><h1>${esc(T("ui.minorT"))}</h1><p>${esc(T("ui.minorP"))}</p>
+        <div class="social" style="justify-content:center;margin:14px 0"><a class="wa" href="https://wa.me/${esc(SITE.whatsapp)}" target="_blank" rel="noopener">${NCX.WA_SVG}<span>${esc(T("ui.wa"))}</span></a></div>
+        <button class="btn ghost" type="button" id="backf">${esc(T("ui.back"))}</button></div>`;
+      document.getElementById("backf").onclick = () => { state = "form"; show(); };
+      return;
+    }
+    Form(card, sections, {
+      data,
+      header: () => `<div class="fhead"><span class="ico">${icon("plan")}</span><h1>${esc(T("ui.appT"))}</h1></div><p class="fdesc">${esc(T("ui.appP"))}</p>`,
+      extra: () => `<div class="hp" aria-hidden="true"><label>Website <input tabindex="-1" autocomplete="off" id="hp"></label></div>`,
+      onChange: d => { const c = Object.assign({}, d); delete c.consent; store.set("nc-apply", JSON.stringify(c)); },
+      onSubmit: async d => {
+        if (Number(d.a_age) < 18) { state = "minor"; show(); window.scrollTo(0, 0); return; }
+        const payload = Object.assign({}, d, { website: (document.getElementById("hp") || {}).value || "" });
+        const r = await api("apply", { lang: NCX.LANG(), data: payload });
+        if (!r || !r.ok) throw new Error("net");
+        store.del("nc-apply"); state = "done"; show(); window.scrollTo(0, 0);
+      }
+    });
+  }
+  NCX.start(show);
+})();
+</script>
+</body>
+</html>

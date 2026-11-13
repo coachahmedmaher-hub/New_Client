@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>My coaching · Coach Ahmed Maher</title>
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css?v=1">
+</head>
+<body>
+<header class="top" id="top"></header>
+<main class="wrap narrow" id="main"><div class="formcard"><div class="state"><div class="spin"></div><span data-t="ui.loading">Loading…</span></div></div></main>
+<footer id="foot"></footer>
+
+<script src="assets/config.js?v=1"></script>
+<script src="assets/core.js?v=1"></script>
+<script>
+(function () {
+  const { T, esc, icon, api } = NCX, main = document.getElementById("main");
+  const token = new URLSearchParams(location.search).get("t") || "", q = "?t=" + encodeURIComponent(token);
+  let c = null, denied = false;
+  const fmt = iso => { if (!iso) return ""; const d = new Date(String(iso).length === 10 ? iso + "T00:00:00" : iso); return isNaN(d) ? String(iso) : d.toLocaleDateString(NCX.LANG() === "ar" ? "ar-EG" : NCX.LANG(), { day: "numeric", month: "short", year: "numeric" }); };
+  const tone = s => ({ active: "good", accepted: "good", completed: "", hold: "warn", rejected: "bad" }[s] || "warn");
+  function spark(pts) {
+    const v = pts.filter(p => p.w !== "" && p.w != null).map(p => Number(p.w)); if (v.length < 2) return "";
+    const W = 300, H = 70, mn = Math.min(...v), mx = Math.max(...v), r = (mx - mn) || 1;
+    const xy = v.map((y, i) => [10 + i * (W - 20) / (v.length - 1), 10 + (H - 20) * (1 - (y - mn) / r)]);
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;direction:ltr" role="img" aria-label="${esc(T("ui.cdWeight"))}"><polyline fill="none" stroke="#e0ac2b" stroke-width="2" points="${xy.map(p => p.join(",")).join(" ")}"/>${xy.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#0b0b0c" stroke="#e0ac2b" stroke-width="2"><title>${v[i]} kg</title></circle>`).join("")}</svg>`;
+  }
+  function show() {
+    if (denied) { main.innerHTML = `<div class="formcard"><div class="done"><div class="big">${icon("shield")}</div><p>${esc(T("ui.noAccess"))}</p></div></div>`; return; }
+    if (!c) return;
+    const sub = c.sub_months ? T("ui.months", { n: c.sub_months }) : T("ui.cdNone");
+    const canCheck = ["accepted", "active"].indexOf(c.status) > -1;
+    const ch = (c.checkins || []).slice().reverse();
+    main.innerHTML = `<div class="formcard">
+      <div class="fhead"><span class="ico">${icon("target")}</span><h1>${esc(T("ui.cdHi", { name: (c.name || "").split(" ")[0] }))}</h1></div>
+      <div class="dgrid">
+        <div class="dcard"><small>${esc(T("ui.cdStatus"))}</small><span class="pill ${tone(c.status)}">${esc(T("ui.s_" + c.status))}</span></div>
+        <div class="dcard"><small>${esc(T("ui.cdSub"))}</small><b>${esc(sub)}</b>${c.sub_start ? `<div style="color:var(--ink2);font-size:.88rem;margin-top:4px">${esc(T("ui.cdStart"))}: ${esc(fmt(c.sub_start))}<br>${esc(T("ui.cdEnd"))}: ${esc(fmt(c.sub_end))}</div>` : ""}</div>
+        <div class="dcard"><small>${esc(T("ui.cdAssess"))}</small><b>${esc(c.assessment_at ? T("ui.cdAssessDone", { d: fmt(c.assessment_at) }) : T("ui.cdAssessTodo"))}</b></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${c.status !== "completed" ? `<a class="btn ${c.assessment_at ? "ghost" : "gold"}" href="assessment.html${q}">${esc(c.assessment_at ? T("ui.cdAssessEdit") : T("ui.cdAssessGo"))}</a>` : ""}
+        ${canCheck ? `<a class="btn ${c.assessment_at ? "gold" : "ghost"}" href="checkin.html${q}">${esc(T("ui.cdCheckGo"))}</a>` : ""}
+      </div>
+      <h2 style="margin:28px 0 10px;font-size:1.15rem">${esc(T("ui.cdHist"))}</h2>
+      ${spark(c.checkins || [])}
+      ${ch.length ? `<div style="overflow-x:auto"><table class="hist"><thead><tr><th></th><th>${esc(T("ui.cdWeight"))}</th><th>${esc(T("ui.cdSess"))}</th><th>${esc(T("ui.cdEnergy"))}</th></tr></thead><tbody>
+        ${ch.map(x => `<tr><td>${esc(fmt(x.date))}</td><td>${x.w !== "" && x.w != null ? esc(x.w) + " " + esc(T("ui.kg")) : "—"}</td><td>${esc(x.s)}</td><td>${esc(x.e)}</td></tr>`).join("")}</tbody></table></div>` : `<p style="color:var(--muted)">${esc(T("ui.cdNoHist"))}</p>`}
+    </div>`;
+  }
+  NCX.start(show);
+  (async () => { try { const r = await api("client", { token }); if (!r.ok) denied = true; else c = r.client; } catch (e) { denied = true; } show(); })();
+})();
+</script>
+</body>
+</html>

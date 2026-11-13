@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Assessment · Coach Ahmed Maher</title>
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css?v=1">
+</head>
+<body>
+<header class="top" id="top"></header>
+<main class="wrap narrow">
+  <div class="formcard" id="card"><div class="state"><div class="spin"></div><span data-t="ui.loading">Loading…</span></div></div>
+</main>
+<footer id="foot"></footer>
+
+<script src="assets/config.js?v=1"></script>
+<script src="assets/core.js?v=1"></script>
+<script src="assets/schema.js?v=1"></script>
+<script>
+(function () {
+  const { T, esc, icon, api, Form, store, human } = NCX, card = document.getElementById("card");
+  const token = new URLSearchParams(location.search).get("t") || "";
+  const KEY = "nc-assess:" + token, secs = SCHEMA.assessment;
+  let saved = {}; try { saved = JSON.parse(store.get(KEY) || "{}"); } catch (e) {}
+  const data = saved.d || {}; let step = saved.s || 0, client = null, state = "loading", resumed = !!saved.d;
+
+  function summary(d) {
+    const f = id => secs.flatMap(s => s.fields).find(x => x.id === id);
+    const app = (client && client.app) || {};
+    const rows = [
+      ["sumDays", (d.q14 ? T("ui.perSession", { n: d.q14 }) : "")],
+      ["sumSleep", d.q31 ? human(f("q31"), d.q31, d, NCX.LANG()) + " h" : ""],
+      ["sumStress", d.q33 !== undefined && d.q33 !== "" ? d.q33 + " / 10" : ""],
+      ["sumCheck", d.q38 ? human(f("q38"), d.q38, d, NCX.LANG()) : ""],
+      ["sumGoal", d.q4 ? String(d.q4).slice(0, 90) : ""]
+    ].filter(r => r[1]);
+    return `<div class="sum">${rows.map(r => `<div><small>${esc(T("ui." + r[0]))}</small><b>${esc(r[1])}</b></div>`).join("")}</div>`;
+  }
+  function show() {
+    if (state === "loading") return;
+    if (state === "denied") { card.innerHTML = `<div class="done"><div class="big">${icon("shield")}</div><p>${esc(T("ui.noAccess"))}</p><div class="social" style="justify-content:center"><a class="wa" href="https://wa.me/${esc(SITE.whatsapp)}" target="_blank" rel="noopener">${NCX.WA_SVG}<span>${esc(T("ui.wa"))}</span></a></div></div>`; return; }
+    if (state === "done") {
+      card.innerHTML = `<div class="done"><div class="big">${icon("check")}</div><h1>${esc(T("ui.asDoneT"))}</h1><p>${esc(T("ui.asDoneP", { name: (client.name || "").split(" ")[0] }))}</p>${summary(data)}
+        <a class="btn gold" href="client.html?t=${encodeURIComponent(token)}">${esc(T("ui.cdT"))}</a></div>`; return;
+    }
+    Form(card, secs, {
+      data, step, draft: true,
+      header: (sec, i) => i === 0 ? `<div class="fhead"><span class="ico">${icon("plan")}</span><h1>${esc(T("ui.asT"))}</h1></div><p class="fdesc">${esc(T("ui.asP"))}</p>${resumed ? `<div class="note">${icon("check")}<span>${esc(T("ui.resume"))}</span></div>` : ""}` : "",
+      onChange: (d, s) => { step = s; store.set(KEY, JSON.stringify({ d, s })); },
+      onSubmit: async d => {
+        const flags = SCHEMA.flags(d, client.app).map(x => x.k).join(", ");
+        const r = await api("assess", { token, data: d, flat: NCX.flatten(secs, d), flags });
+        if (!r || !r.ok) throw new Error(r && r.error === "no_access" ? "net" : "net");
+        store.del(KEY); state = "done"; show(); window.scrollTo(0, 0);
+      }
+    });
+  }
+  NCX.start(show);
+  (async () => {
+    try {
+      const r = await api("client", { token });
+      if (!r.ok) { state = "denied"; return show(); }
+      client = r.client;
+      if (!saved.d && !store.get("nc-lang") && client.lang && client.lang !== NCX.LANG()) await NCX.setLang(client.lang);
+      state = "form"; show();
+    } catch (e) { state = "denied"; show(); }
+  })();
+})();
+</script>
+</body>
+</html>

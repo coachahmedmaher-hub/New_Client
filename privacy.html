@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Coach Ahmed Maher</title>
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css?v=1">
+</head>
+<body data-doc="privacy">
+<header class="top" id="top"></header>
+<main class="wrap narrow legal" id="doc"></main>
+<footer id="foot"></footer>
+<script src="assets/config.js?v=1"></script>
+<script src="assets/core.js?v=1"></script>
+<script>
+NCX.start(() => {
+  const { T, esc, get } = NCX, k = document.body.dataset.doc;
+  document.getElementById("doc").innerHTML = `<h1>${esc(T("ui." + k))}</h1>` + (get(k) || []).map(([h, p]) => `<h2>${esc(h)}</h2><p>${esc(p)}</p>`).join("") + `<p style="margin:30px 0"><a class="btn ghost" href="index.html">${esc(T("ui.home"))}</a></p>`;
+});
+</script>
+</body>
+</html>
