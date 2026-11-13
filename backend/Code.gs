@@ -3,7 +3,7 @@
  * Lives inside your own Google Sheet: Extensions → Apps Script → paste this file.
  *
  * 1) Change COACH_PASSWORD below to your own password.
- * 2) Run the function "setup" once (it creates the tabs and stores the password safely).
+ * 2) (Optional) Run "setup" once. If it fails, skip it: the tabs are created automatically on the first application.
  * 3) Deploy → New deployment → Web app → Execute as: Me → Who has access: Anyone → Deploy.
  * 4) Copy the Web app URL into assets/config.js on the website.
  *
@@ -99,9 +99,9 @@ const ACTIONS = {
 
   /* ---------- coach only ---------- */
   login: req => {
-    const props = PropertiesService.getScriptProperties();
-    if (!props.getProperty("PW_HASH")) return { ok: false, error: "run_setup" };
-    if (hash_(String(req.password || "")) !== props.getProperty("PW_HASH")) { Utilities.sleep(800); return { ok: false, error: "wrong_password" }; }
+    // works even if "setup" was never run: falls back to the password written at the top of this file
+    const saved = PropertiesService.getScriptProperties().getProperty("PW_HASH") || hash_(COACH_PASSWORD);
+    if (hash_(String(req.password || "")) !== saved) { Utilities.sleep(800); return { ok: false, error: "wrong_password" }; }
     const s = Utilities.getUuid();
     CacheService.getScriptCache().put("s_" + s, "1", 21600);   // 6 hours
     return { ok: true, session: s };
