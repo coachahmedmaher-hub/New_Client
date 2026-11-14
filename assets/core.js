@@ -3,13 +3,14 @@
   const ORDER = ["ar", "en", "ur", "hi", "ml", "fil", "fr", "de", "ru"];
   const NAMES = { ar: "العربية", en: "English", ur: "اردو", hi: "हिन्दी", ml: "മലയാളം", fil: "Filipino", fr: "Français", de: "Deutsch", ru: "Русский" };
   const RTL = { ar: 1, ur: 1 };
-  const V = "?v=2";
+  const V = "?v=3";
   const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
   const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   function pickLang() {
     const q = new URLSearchParams(location.search).get("lang"); if (q && NAMES[q]) return q;
+    const u = new URLSearchParams(location.search).get("l"); if (u && NAMES[u]) { store.set("nc-lang", u); return u; }   // personal links carry the client's language
     const s = store.get("nc-lang"); if (s && NAMES[s]) return s;
     const n = (navigator.language || "en").toLowerCase(), m = { ar: "ar", ur: "ur", hi: "hi", ml: "ml", fil: "fil", tl: "fil", fr: "fr", de: "de", ru: "ru" };
     return m[n.slice(0, 3)] || m[n.slice(0, 2)] || "en";

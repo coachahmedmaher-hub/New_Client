@@ -135,6 +135,7 @@
     adone: rows.filter(hasAssess).length, review: rows.filter(needsReview).length
   });
   const PRICE = { 2: 500, 3: 700, 4: 900 };
+  const WAMSG = {"ar": "أهلاً {name} 👋\nده رابطك الشخصي في Coach Ahmed Maher Online Coaching:\n{link}\nمنه تملا التقييم الكامل وتبعت متابعتك الأسبوعية. الرابط ده ليك انت بس — متشاركهوش.", "en": "Hi {name} 👋\nHere is your personal link for Coach Ahmed Maher Online Coaching:\n{link}\nUse it to fill in your full assessment and send your weekly check-ins. This link is only for you — please don't share it.", "ur": "السلام علیکم {name} 👋\nیہ Coach Ahmed Maher Online Coaching میں آپ کا ذاتی لنک ہے:\n{link}\nاس سے آپ مکمل اسیسمنٹ بھریں اور اپنا ہفتہ وار چیک اِن بھیجیں۔ یہ لنک صرف آپ کے لیے ہے — براہ کرم کسی کے ساتھ شیئر نہ کریں۔", "hi": "नमस्ते {name} 👋\nयह Coach Ahmed Maher Online Coaching में आपका पर्सनल लिंक है:\n{link}\nइससे आप अपना पूरा असेसमेंट भरें और हर हफ़्ते का चेक-इन भेजें। यह लिंक सिर्फ़ आपके लिए है — कृपया किसी से शेयर न करें।", "ml": "ഹായ് {name} 👋\nCoach Ahmed Maher Online Coaching-ലെ നിങ്ങളുടെ വ്യക്തിഗത ലിങ്ക് ഇതാ:\n{link}\nഇതിലൂടെ നിങ്ങളുടെ പൂർണ്ണ അസസ്മെന്റ് പൂരിപ്പിക്കുകയും പ്രതിവാര ചെക്ക്-ഇൻ അയയ്ക്കുകയും ചെയ്യുക. ഈ ലിങ്ക് നിങ്ങൾക്ക് മാത്രമുള്ളതാണ് — ദയവായി ആരുമായും പങ്കിടരുത്.", "fil": "Hi {name} 👋\nIto ang personal link mo para sa Coach Ahmed Maher Online Coaching:\n{link}\nDito mo sasagutan ang buong assessment at ipapadala ang lingguhang check-in. Para sa iyo lang ang link na ito — huwag itong ibahagi.", "fr": "Bonjour {name} 👋\nVoici votre lien personnel pour Coach Ahmed Maher Online Coaching :\n{link}\nUtilisez-le pour remplir votre bilan complet et envoyer vos bilans hebdomadaires. Ce lien est uniquement pour vous — merci de ne pas le partager.", "de": "Hallo {name} 👋\nHier ist dein persönlicher Link für Coach Ahmed Maher Online Coaching:\n{link}\nDamit füllst du dein vollständiges Assessment aus und sendest deine wöchentlichen Check-ins. Dieser Link ist nur für dich — bitte teile ihn nicht.", "ru": "Здравствуйте, {name} 👋\nВот ваша личная ссылка для Coach Ahmed Maher Online Coaching:\n{link}\nПо ней вы заполните полную анкету и будете отправлять еженедельные отчёты. Эта ссылка только для вас — пожалуйста, не передавайте её никому."};
   const DAYIDX = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   function nextCheck(r, assess) {
     const day = assess && assess.q38; if (!day || r.status !== "active") return "";
@@ -256,9 +257,10 @@
     setLangUI();
     const c = current, a = c.assess || {}, p = c.app || {}, has = Object.keys(a).length > 0;
     const flags = has ? S.flags(a, p) : S.flags({}, p);
-    const link = c.token ? new URL("client.html?t=" + c.token, location.href).href : "";
+    const link = c.token ? new URL("client.html?t=" + c.token + (c.lang ? "&l=" + c.lang : ""), location.href).href : "";
     const nc = nextCheck(c, a);
-    const waText = t("waMsg", { name: (c.name || "").split(" ")[0], link });
+    const waTpl = WAMSG[c.lang] || WAMSG.en;   // message goes out in the language the client chose on the site
+    const waText = waTpl.replace("{name}", (c.name || "").split(" ")[0]).replace("{link}", link);
     const count = { n: 0 };
     const secHtml = sectionQA(t("appSec"), appFields, p, count) + (has ? S.assessment.map(s => sectionQA((NL().sec[s.id] || NC.en.sec[s.id]).t, s.fields, a, count)).join("") : `<div class="panel" style="color:var(--muted)">${esc(t("noAssess"))}</div>`);
     const ch = c.checkins || [];

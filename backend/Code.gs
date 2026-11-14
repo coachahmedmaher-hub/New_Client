@@ -178,11 +178,22 @@ function notify_(subject, lines) {   // an email never blocks saving: any proble
   try {
     const to = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail(); if (!to) return;
     MailApp.sendEmail({ to: to, subject: subject + " — Coach Ahmed Maher", body: lines.filter(String).join("\n") + "\n\nافتح لوحة الكوتش:\n" + DASHBOARD_URL });
-  } catch (e) {}
+  } catch (e) { logErr_("email", e); }
+}
+/* Problems are written to a "Log" tab in the sheet, so you can see why an email didn't arrive. */
+function logErr_(where, e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName("Log") || ss.insertSheet("Log");
+    if (sh.getLastRow() === 0) sh.appendRow(["time", "where", "error"]);
+    sh.appendRow([new Date(), where, String(e && e.message || e)]);
+  } catch (x) {}
 }
 /* Run this once from the editor: it asks Google for permission to send you emails, then sends a test email. */
-function testNotify() {
-  notify_("✅ تجربة الإشعارات", ["لو الإيميل ده وصلك، يبقى الإشعارات شغالة."]);
+function testNotify() {   // no try/catch here on purpose: if something is wrong you will SEE the error
+  const to = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail();
+  MailApp.sendEmail({ to: to, subject: "✅ تجربة الإشعارات — Coach Ahmed Maher", body: "لو الإيميل ده وصلك، يبقى الإشعارات شغالة.\n\nالإيميلات المتبقية النهارده: " + MailApp.getRemainingDailyQuota() });
+  Logger.log("Sent to " + to + " — remaining today: " + MailApp.getRemainingDailyQuota());
   return "Sent to " + (NOTIFY_EMAIL || Session.getEffectiveUser().getEmail());
 }
 
